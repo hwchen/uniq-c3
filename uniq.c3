@@ -25,17 +25,17 @@ fn void! main() {
             } else {
                 filter.set(key, 0);
                 if (stdout_len + line.len + 1 >= stdout_buffer.len) {
-                    stdout.write(stdout_buffer[0..stdout_len - 1])!;
+                    stdout.write(stdout_buffer[0:stdout_len])!;
                     stdout_len = 0;
                 }
-                mem::copy(stdout_buffer[stdout_len..stdout_len + line.len], line.ptr, line.len);
+                mem::copy(stdout_buffer[stdout_len:stdout_len + line.len], line.ptr, line.len);
                 stdout_len += line.len;
                 stdout_buffer[stdout_len] = '\n';
                 stdout_len += 1;
             }
         }
     };
-    stdout.write(stdout_buffer[0..stdout_len - 1])!;
+    stdout.write(stdout_buffer[0:stdout_len])!;
 }
 
 fn long hash(char[] input) @inline {
