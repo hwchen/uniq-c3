@@ -19,7 +19,7 @@ fn usz! StdOut.writen(&self, char[] s) {
     }
     // io::printfn("%s", self.buffer[self.end:self.end]); // this causes an index out of bounds
     // so mem::copy just uses slice to end of buffer
-    mem::copy(self.buffer[self.end..], s.ptr, s.len);
+    mem::copy(&self.buffer[self.end], s.ptr, s.len);
     self.end += s.len;
     self.buffer[self.end] = '\n';
     self.end += 1;
