@@ -17,7 +17,6 @@ fn void! main() {
         while (true) {
             char[]! line = io::treadline();
             if (catch line) {
-                // this check segfaults when there's no optimization. Ok at O3
                 break;
             }
             long key = hash(line);
@@ -26,7 +25,7 @@ fn void! main() {
             } else {
                 filter.set(key, 0);
                 if (stdout_len + line.len + 1 >= stdout_buffer.len) {
-                    stdout.write(stdout_buffer[0..stdout_len])!;
+                    stdout.write(stdout_buffer[0..stdout_len - 1])!;
                     stdout_len = 0;
                 }
                 mem::copy(stdout_buffer[stdout_len..stdout_len + line.len], line.ptr, line.len);
@@ -36,7 +35,7 @@ fn void! main() {
             }
         }
     };
-    stdout.write(stdout_buffer[0..stdout_len])!;
+    stdout.write(stdout_buffer[0..stdout_len - 1])!;
 }
 
 fn long hash(char[] input) @inline {

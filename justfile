@@ -11,3 +11,7 @@ benchmark *args="":
     './uniq < /usr/share/dict/words' \
     'ouniq < /usr/share/dict/words' \
     'runiq /usr/share/dict/words'
+
+# quick sanity check
+test:
+    just build -O3 && diff <(./uniq < /usr/share/dict/words) <(cat /usr/share/dict/words)
