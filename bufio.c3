@@ -18,7 +18,7 @@ fn usz! StdOut.writen(&self, char[] s) {
         self.end = 0;
     }
     // io::printfn("%s", self.buffer[self.end:self.end]); // this causes an index out of bounds
-    // so mem::copy just uses slice to end of buffer
+    // so mem::copy just uses slice to end of buffer. It should use a pointer anyways.
     mem::copy(&self.buffer[self.end], s.ptr, s.len);
     self.end += s.len;
     self.buffer[self.end] = '\n';
