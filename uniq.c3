@@ -1,33 +1,44 @@
 module uniq;
 
 import std::collections::map;
+import std::core::mem;
 import std::io;
 import std::hash;
 
 def Set = map::HashMap(<long, char>);
 
 fn void! main() {
+    File* stdout = std::io::stdout();
+    char[4096] stdout_buffer;
+    usz stdout_len = 0;
     Set filter;
     filter.temp_init();
-    // TODO: input can be file or stdin
-    while (true) {
-        char[]! line = io::treadline();
-        if (catch line) {
-            if (line.len == 0) {
-                return;
+    @pool() {
+        while (true) {
+            char[]! line = io::treadline();
+            if (catch line) {
+                // this check segfaults when there's no optimization. Ok at O3
+                break;
+            }
+            long key = hash(line);
+            if (filter.has_key(key)) {
+                continue;
+            } else {
+                filter.set(key, 0);
+                if (stdout_len + line.len + 1 >= stdout_buffer.len) {
+                    stdout.write(stdout_buffer[0..stdout_len])!;
+                    stdout_len = 0;
+                }
+                mem::copy(stdout_buffer[stdout_len..stdout_len + line.len], line.ptr, line.len);
+                stdout_len += line.len;
+                stdout_buffer[stdout_len] = '\n';
+                stdout_len += 1;
             }
         }
-        //long key = hash(line);
-        //if (filter.has_key(key)) {
-        //    continue;
-        //} else {
-        //    filter.set(key, 0);
-        //    io::printfn("%s", line);
-        //}
-        io::printfn("%s", line);
-    }
+    };
+    stdout.write(stdout_buffer[0..stdout_len])!;
 }
 
-fn long hash(char[] input) {
+fn long hash(char[] input) @inline {
     return hash::fnv64a::encode(input);
 }
