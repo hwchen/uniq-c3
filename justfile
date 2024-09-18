@@ -1,8 +1,13 @@
-build:
-    c3c compile -O3 ./uniq.c3
+# -O3 for optimized build
+build *args="":
+    c3c compile {{args}} uniq.c3
+
+# -O3 for optimized build
+run *args="":
+    c3c compile-run {{args}} uniq.c3
 
 benchmark *args="":
-    c3c compile -O3 ./uniq.c3 && hyperfine --warmup 10 {{args}} \
+    just build -O3 && hyperfine --warmup 10 {{args}} \
     './uniq < /usr/share/dict/words' \
     'ouniq < /usr/share/dict/words' \
     'runiq /usr/share/dict/words'
