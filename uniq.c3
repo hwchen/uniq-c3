@@ -10,13 +10,18 @@ import bufio;
 def Set = map::HashMap(<long, char>);
 
 fn void! main() {
+    bufio::StdIn stdin;
+    // not sure why this can't be held in bufio::StdIn,
+    //but caused intermittent clearing of the buf
+    char[32] inbuf;
+    stdin.init(&inbuf);
     bufio::StdOut stdout;
     stdout.init();
     Set filter;
     filter.temp_init();
     @pool() {
         while (true) {
-            char[]! line = io::treadline();
+            char[]! line = bufio::treadline(.stream=stdin);
             if (catch line) { // causes segfault unless optimized?
                 break;
             }
