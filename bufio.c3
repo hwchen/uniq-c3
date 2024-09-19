@@ -50,13 +50,15 @@ fn usz! StdIn.read(&self, char[] dest) @dynamic {
     while (dest_index < dest.len) {
         usz written = math::min(dest.len - dest_index, self.end - self.start);
         mem::copy(dest[dest_index..], self.buffer[self.start..], written);
-        // TODO: removing this print causes junk
-        io::printfn("after copy, dest: %d, buf: %s", dest[0], self.buffer);
+        // somehow a read is still triggered even when we haven't gotten through the buffer yet
+        // Looks like it's after an endline. Is there some weird interaction with treadline? Yes,
+        // I had to pass StdIn to readline by pointer; doing it by value passed in a copy of the original
+        // each time. Not sure why it was easy to miss this. I guess in Odin one struct controls the state,
+        // but here it's passing a struct to a function.
         if (written == 0) {
             // buf empty, fill it
             usz n = self.stdin.read(self.buffer)!;
             if (n == 0) {
-                io::printfn("zero read");
                 // reading from the unbuffered stream returned nothing
                 // so we have nothing left to read.
                 return dest_index;
@@ -80,7 +82,7 @@ fn char! StdIn.read_byte(&self) @dynamic {
     return dest[0];
 }
 
-// Required because I can't seem to get StdIn to implement InStream.
+// Required because I can't seem to get StdIn to implement InStream. Copied from std.
 macro String! readline(stream = io::stdin(), Allocator allocator = allocator::heap())
 {
 	bool $is_stream = @typeis(stream, InStream);
@@ -116,6 +118,7 @@ macro String! readline(stream = io::stdin(), Allocator allocator = allocator::he
     };
 }
 
+// Required because I can't seem to get StdIn to implement InStream. Copied from std.
 macro String! treadline(stream = io::stdin())
 {
 	return readline(stream, allocator::temp()) @inline;

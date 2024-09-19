@@ -21,7 +21,7 @@ fn void! main() {
     filter.temp_init();
     @pool() {
         while (true) {
-            char[]! line = bufio::treadline(.stream=stdin);
+            char[]! line = bufio::treadline(.stream=&stdin);
             if (catch line) { // causes segfault unless optimized?
                 break;
             }
