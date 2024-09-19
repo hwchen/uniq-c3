@@ -6,12 +6,17 @@ build *args="":
 run *args="":
     c3c compile-run {{args}} uniq.c3 bufio.c3
 
-benchmark *args="":
+hyperfine *args="":
     just build -O3 && hyperfine --warmup 10 {{args}} \
-    './uniq < /usr/share/dict/words' \
+    './uniq /usr/share/dict/words' \
     'ouniq < /usr/share/dict/words' \
+    'runiq /usr/share/dict/words'
+
+bench *args="":
+    just build -O3 && poop {{args}} \
+    './uniq /usr/share/dict/words' \
     'runiq /usr/share/dict/words'
 
 # quick sanity check
 test:
-    just build -O3 && diff <(./uniq < /usr/share/dict/words) <(cat /usr/share/dict/words)
+    just build -O3 && diff <(./uniq - < /usr/share/dict/words) <(cat /usr/share/dict/words)
