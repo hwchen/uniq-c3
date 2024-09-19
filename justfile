@@ -21,4 +21,4 @@ bench *args="":
 
 # quick sanity check
 test:
-    just build -O3 && diff <(./uniq - < /usr/share/dict/words) <(cat /usr/share/dict/words)
+    just build && diff <(./uniq - < /usr/share/dict/words) <(cat /usr/share/dict/words)
