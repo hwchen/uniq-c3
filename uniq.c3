@@ -36,7 +36,7 @@ fn void! main(String[] args) {
     filter.temp_init();
     @pool() {
         while (true) {
-            char[]! line = bufio::treadline(.stream=in);
+            char[]! line = bufio::treadline(stream:in);
             if (catch excuse = line) {
                 break;
             }
