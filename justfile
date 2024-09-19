@@ -1,3 +1,5 @@
+set shell := ["bash", "-uc"]
+
 # -O3 for optimized build
 build *args="":
     c3c compile {{args}} uniq.c3 bufio.c3
