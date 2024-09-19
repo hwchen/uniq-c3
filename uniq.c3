@@ -37,7 +37,7 @@ fn void! main(String[] args) {
     @pool() {
         while (true) {
             char[]! line = bufio::treadline(.stream=in);
-            if (catch line) { // causes segfault unless optimized?
+            if (catch excuse = line) {
                 break;
             }
             long key = hash(line);
@@ -49,6 +49,7 @@ fn void! main(String[] args) {
             }
         }
     };
+    io::printfn("hit");
     stdout.flush()!;
 }
 
