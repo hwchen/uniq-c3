@@ -11,8 +11,8 @@ def Set = map::HashMap(<long, char>);
 
 // TODO: weird, buffering stdin doesn't seem to increase speed
 // TODO: change StdIn to BufReader
-// TODO: solve segfault when not compiled with optimizations
 // TODO: implement faster Set
+// TODO: solve segfault when not compiled with optimizations (filed bug https://github.com/c3lang/c3c/issues/1462)
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
     InStream in;
