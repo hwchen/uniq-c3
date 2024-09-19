@@ -49,7 +49,6 @@ fn void! main(String[] args) {
             }
         }
     };
-    io::printfn("hit");
     stdout.flush()!;
 }
 
