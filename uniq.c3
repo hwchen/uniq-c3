@@ -10,6 +10,9 @@ import bufio;
 def Set = map::HashMap(<long, char>);
 
 // TODO: weird, buffering stdin doesn't seem to increase speed
+// TODO: change StdIn to BufReader
+// TODO: solve segfault when not compiled with optimizations
+// TODO: implement faster Set
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
     InStream in;
