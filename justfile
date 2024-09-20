@@ -2,15 +2,14 @@ set shell := ["bash", "-uc"]
 
 # -O3 for optimized build
 build *args="":
-    c3c compile {{args}} uniq.c3 bufio.c3 set.c3
+    c3c compile {{args}} -l xxhash uniq.c3 bufio.c3 set.c3
 
 # -O3 for optimized build
 run *args="":
-    c3c compile-run {{args}} uniq.c3 bufio.c3 set.c3
+    c3c compile-run {{args}} -l xxhash uniq.c3 bufio.c3 set.c3
 
-# -O3 for optimized build
 test:
-    c3c compile-test uniq.c3 bufio.c3 set.c3
+    c3c compile-test set.c3
 
 hyperfine *args="":
     just build -O3 && hyperfine --warmup 10 {{args}} \

@@ -51,6 +51,7 @@ fn void! main(String[] args) {
     stdout.flush()!;
 }
 
+extern fn ulong xxhash(void* input, usz length, ulong seed) @extern("XXH64");
 fn long hash(char[] input) @inline {
-    return hash::fnv64a::encode(input);
+    return xxhash(&input[0], input.len, 0);
 }
