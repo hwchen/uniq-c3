@@ -15,7 +15,7 @@
         in {
         devShells.default = pkgs.mkShell {
         nativeBuildInputs = [
-        pkgs.c3c
+        #pkgs.c3c
         pkgs.poop
         pkgs.hyperfine
         ];

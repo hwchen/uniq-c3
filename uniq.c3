@@ -6,8 +6,7 @@ import std::io;
 import std::hash;
 
 import bufio;
-
-def Set = map::HashMap(<long, char>);
+import set;
 
 // TODO: weird, buffering stdin doesn't seem to increase speed
 // TODO: change StdIn to BufReader
@@ -32,8 +31,8 @@ fn void! main(String[] args) {
 
     bufio::StdOut stdout;
     stdout.init();
-    Set filter;
-    filter.temp_init();
+    set::Set filter;
+    filter.init_capacity(16);
     @pool() {
         while (true) {
             char[]! line = bufio::treadline(stream:in);
@@ -41,10 +40,10 @@ fn void! main(String[] args) {
                 break;
             }
             long key = hash(line);
-            if (filter.has_key(key)) {
+            if (filter.contains(key)) {
                 continue;
             } else {
-                filter.set(key, 0);
+                filter.insert(key);
                 stdout.writen(line)!;
             }
         }
