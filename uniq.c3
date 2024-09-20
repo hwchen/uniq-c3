@@ -15,9 +15,7 @@ import set;
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
     InStream in;
-    // not sure why this can't be held in bufio::StdIn,
-    //but caused intermittent clearing of the buf
-    char[4096 * 100] inbuf;
+    char[4096 * 8] inbuf;
     if (args[1] == "-")  {
         bufio::StdIn stdin;
         stdin.init(&inbuf);
@@ -30,7 +28,8 @@ fn void! main(String[] args) {
     }
 
     bufio::StdOut stdout;
-    stdout.init();
+    char[4096 * 8] outbuf;
+    stdout.init(&outbuf);
     set::Set filter;
     filter.temp_init_capacity(16);
     @pool() {

@@ -5,12 +5,13 @@ import std::math;
 
 struct StdOut {
     File* stdout;
-    char[4096] buffer;
+    char[] buffer;
     usz end;
 }
 
-fn void StdOut.init(&self) {
-     self.stdout = std::io::stdout();
+fn void StdOut.init(&self, char[] buffer) {
+    self.stdout = std::io::stdout();
+    self.buffer = buffer;
 }
 
 fn usz! StdOut.writen(&self, char[] s) {
