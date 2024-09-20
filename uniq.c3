@@ -31,9 +31,9 @@ fn void! main(String[] args) {
     char[4096 * 8] outbuf;
     stdout.init(&outbuf);
     set::Set filter;
-    filter.temp_init_capacity(16);
-    @pool() {
-        while (true) {
+    filter.init_capacity(16);
+    while (true) {
+        @pool() {
             char[]! line = bufio::treadline(stream:in);
             if (catch excuse = line) {
                 break;
@@ -45,8 +45,8 @@ fn void! main(String[] args) {
                 filter.insert(key);
                 stdout.writen(line)!;
             }
-        }
-    };
+        };
+    }
     stdout.flush()!;
 }
 
