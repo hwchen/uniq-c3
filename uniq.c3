@@ -26,7 +26,7 @@ fn void! main(String[] args) {
         File f = io::file::open(args[1], "r")!;
         ReadBuffer rdr;
         rdr.init(&f, &inbuf);
-        in = (InStream)&f;
+        in = (InStream)&rdr;
     }
 
     bufio::StdOut stdout;
