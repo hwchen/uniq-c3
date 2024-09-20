@@ -18,7 +18,6 @@
         #pkgs.c3c
         pkgs.poop
         pkgs.hyperfine
-        pkgs.xxHash
         ];
       };
     });
