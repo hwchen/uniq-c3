@@ -32,8 +32,8 @@ fn void! main(String[] args) {
     bufio::StdOut stdout;
     stdout.init();
     set::Set filter;
-    filter.init_capacity(16);
     @pool() {
+		filter.temp_init_capacity(16);
         while (true) {
             char[]! line = bufio::treadline(stream:in);
             if (catch excuse = line) {

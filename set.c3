@@ -4,12 +4,14 @@ module set;
 // On laptop, bench time went from 64ms to  44ms
 
 struct Set {
+	Allocator alloc;
     int count;
     ulong[] entries;
 }
 
-fn void Set.init_capacity(&self, int capacity) {
-    self.entries = mem::new_array(ulong, capacity);
+fn void Set.temp_init_capacity(&self, int capacity) {
+    self.alloc = allocator::temp();
+    self.entries = allocator::new_array(self.alloc, ulong, capacity);
 }
 
 // returns true if call sets entry. returns false if entry already exists
@@ -51,11 +53,11 @@ fn bool Set.contains(&self, ulong hash) {
 
 fn void Set.realloc(&self) {
     ulong[] old_entries = self.entries;
-    self.entries = mem::new_array(ulong, old_entries.len * 2);
+    self.entries = allocator::new_array(self.alloc, ulong, old_entries.len * 2);
     foreach(entry:old_entries) {
         self.insert(entry);
     }
-    free(old_entries);
+    allocator::free(self.alloc, old_entries);
 }
 
 fn void! test_set() @test {
