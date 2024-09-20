@@ -10,8 +10,8 @@ import set;
 
 // TODO: weird, buffering stdin doesn't seem to increase speed
 // TODO: change StdIn to BufReader
-// TODO: implement faster Set
-// TODO: solve segfault when not compiled with optimizations (filed bug https://github.com/c3lang/c3c/issues/1462)
+// [x] implement faster Set
+// [x] solve segfault when not compiled with optimizations (filed bug https://github.com/c3lang/c3c/issues/1462)
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
     InStream in;
@@ -32,8 +32,8 @@ fn void! main(String[] args) {
     bufio::StdOut stdout;
     stdout.init();
     set::Set filter;
+    filter.temp_init_capacity(16);
     @pool() {
-		filter.temp_init_capacity(16);
         while (true) {
             char[]! line = bufio::treadline(stream:in);
             if (catch excuse = line) {
