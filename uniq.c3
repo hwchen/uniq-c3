@@ -8,12 +8,8 @@ import std::hash;
 import bufio;
 import set;
 
-// TODO: weird, buffering stdin doesn't seem to increase speed
-// TODO: change StdIn to BufReader
-// TODO: odin reader_read_slice on buffered reader doesn't allocate. This probably accounts for last perf diff
-// TODO: try compiling xxhash to static library
-// [x] implement faster Set
-// [x] solve segfault when not compiled with optimizations (filed bug https://github.com/c3lang/c3c/issues/1462)
+// TODO: Set should use bitwise ops to find index, div/% are slow.
+
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
     InStream in;
