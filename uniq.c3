@@ -33,7 +33,7 @@ fn void! main(String[] args) {
     char[4096 * 8] outbuf;
     stdout.init(&outbuf);
     set::Set filter;
-    filter.init_capacity(16);
+    filter.init_capacity(1024);
 	char[4096] line_buf;
     while (true) {
 		char[]! line = bufio::readline(in, &line_buf);
@@ -41,7 +41,7 @@ fn void! main(String[] args) {
 			if (err == IoError.EOF) break;
 			return err?;
 		}
-		long key = hash(line);
+		long key = line.hash();
 		if (filter.contains(key)) {
 			continue;
 		} else {
@@ -50,9 +50,4 @@ fn void! main(String[] args) {
 		}
     }
     stdout.flush()!;
-}
-
-extern fn ulong xxhash(void* input, usz length, ulong seed) @extern("XXH64") @inline;
-fn long hash(char[] input) @inline {
-    return xxhash(&input[0], input.len, 0);
 }
