@@ -84,7 +84,7 @@ fn char! StdIn.read_byte(&self) @dynamic {
 }
 
 // Required because I can't seem to get StdIn to implement InStream. Copied from std.
-macro String! readline(stream = io::stdin(), Allocator allocator = allocator::heap())
+macro char[]! readline(stream = io::stdin(), char[] buf)
 {
 	bool $is_stream = @typeis(stream, InStream);
 	$if $is_stream:
@@ -95,33 +95,27 @@ macro String! readline(stream = io::stdin(), Allocator allocator = allocator::he
 	$endif
 
     if (val == '\n') return "";
-    @pool(allocator)
-    {
-        DString str = dstring::temp_with_capacity(256);
-    	if (val != '\r') str.append(val);
-    	while (1)
-    	{
-    	    $if $is_stream:
-    	        char! c = func((void*)stream);
-    	    $else
-    	        char! c = stream.read_byte();
-    	    $endif
-    		if (catch err = c)
-    		{
-    			if (err == IoError.EOF) break;
-    			return err?;
-    		}
-    		if (c == '\r') continue;
-    		if (c == '\n') break;
-    		str.append_char(c);
-    	}
-    	return str.copy_str(allocator);
-    };
-}
 
-// Required because I can't seem to get StdIn to implement InStream. Copied from std.
-macro String! treadline(stream = io::stdin())
-{
-	return readline(stream, allocator::temp()) @inline;
-}
+	if (val != '\r') buf[0] = val;
 
+	usz idx = 1;
+	while (1)
+	{
+		$if $is_stream:
+			char! c = func((void*)stream);
+		$else
+			char! c = stream.read_byte();
+		$endif
+		if (catch err = c)
+		{
+			if (err == IoError.EOF) break;
+			return err?;
+		}
+		if (c == '\r') continue;
+		if (c == '\n') break;
+		if (idx >= buf.len) return IoError.OUT_OF_SPACE?;
+		buf[idx] = c;
+		idx += 1;
+	}
+	return buf[0..idx];
+}

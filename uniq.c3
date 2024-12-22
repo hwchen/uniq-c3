@@ -34,20 +34,20 @@ fn void! main(String[] args) {
     stdout.init(&outbuf);
     set::Set filter;
     filter.init_capacity(16);
+	char[4096] line_buf;
     while (true) {
-        @pool() {
-            char[]! line = bufio::treadline(stream:in);
-            if (catch excuse = line) {
-                break;
-            }
-            long key = hash(line);
-            if (filter.contains(key)) {
-                continue;
-            } else {
-                filter.insert(key);
-                stdout.writen(line)!;
-            }
-        };
+		char[]! line = bufio::readline(in, &line_buf);
+		if (catch err = line) {
+			if (err == IoError.EOF) break;
+			return err?;
+		}
+		long key = hash(line);
+		if (filter.contains(key)) {
+			continue;
+		} else {
+			filter.insert(key);
+			stdout.writen(line)!;
+		}
     }
     stdout.flush()!;
 }
