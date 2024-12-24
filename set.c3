@@ -54,8 +54,14 @@ fn bool Set.contains(&self, ulong hash) {
 fn void Set.realloc(&self) {
     ulong[] old_entries = self.entries;
     self.entries = allocator::new_array(self.alloc, ulong, old_entries.len * 2);
+
+	usz old_count = self.count;
+	self.count = 0;
     foreach(entry:old_entries) {
-        self.insert(entry);
+		if (entry != 0) {
+			self.insert(entry);
+		}
+		if (self.count == old_count) break;
     }
     allocator::free(self.alloc, old_entries);
 }
@@ -67,8 +73,11 @@ fn void! test_set() @test {
     set.insert(1);
     set.insert(11);
     set.insert(11);
+    set.insert(111);
 
     assert(set.contains(1));
     assert(set.contains(11));
-    assert(!set.contains(111));
+    assert(set.contains(111));
+    assert(!set.contains(1111));
+	assert(set.count == 3);
 }
