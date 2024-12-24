@@ -13,7 +13,7 @@ import set;
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
     InStream in;
-    char[4096 * 8] inbuf;
+    char[4096] inbuf;
     if (args[1] == "-")  {
         bufio::StdIn stdin;
         stdin.init(&inbuf);
@@ -26,7 +26,7 @@ fn void! main(String[] args) {
     }
 
     bufio::StdOut stdout;
-    char[4096 * 8] outbuf;
+    char[4096] outbuf;
     stdout.init(&outbuf);
     set::Set filter;
     filter.init_capacity(1024);
