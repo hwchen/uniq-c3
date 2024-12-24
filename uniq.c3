@@ -8,11 +8,11 @@ import std::hash;
 import bufio;
 import set;
 
-fn void! main(String[] args) {
+fn int main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
 	if (args.len == 1) {
 		io::eprintn("Please provide one arg: `-` for stdin, else filepath");
-		return;
+		return 1;
 	}
 
     InStream in;
@@ -22,7 +22,11 @@ fn void! main(String[] args) {
         stdin.init(&inbuf);
         in = (InStream)&stdin;
     } else {
-        File f = io::file::open(args[1], "rb")!;
+        File! f = io::file::open(args[1], "rb");
+		if (catch err = f) {
+			io::eprintfn("Error opening file %s: %s", args[1], err);
+			return 1;
+		}
         ReadBuffer rdr;
         rdr.init(&f, &inbuf);
         in = (InStream)&rdr;
@@ -39,12 +43,19 @@ fn void! main(String[] args) {
 		char[]! line = bufio::readline(in, &line_buf);
 		if (catch err = line) {
 			if (err == IoError.EOF) break;
-			return err?;
+			io::eprintfn("Error reading line: %s", err);
+			return 1;
 		}
 		long key = line.hash();
 		if (filter.insert(key)) {
-			stdout.writen(line)!;
+			if (catch err = stdout.writen(line)) {
+				io::eprintfn("Error writing to stdout: %s", err);
+			}
 		}
     }
-    stdout.flush()!;
+    if (catch err = stdout.flush()) {
+		io::eprintfn("Error flushing stdout: %s", err);
+		return 1;
+	}
+	return 0;
 }
