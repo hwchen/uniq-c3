@@ -20,7 +20,8 @@ fn bool Set.insert(&self, ulong hash) {
     if ((float)self.count * 1.25 >= self.entries.len) {
         self.realloc();
     }
-    ulong idx = hash % (ulong)self.entries.len;
+	ulong mask = self.entries.len - 1;
+    ulong idx = hash & mask;
 
     while (true) {
         ulong* entry = &self.entries[idx];
@@ -32,12 +33,13 @@ fn bool Set.insert(&self, ulong hash) {
             *entry = hash;
             return true;
         }
-        idx = (idx + 1) % (ulong)self.entries.len;
+        idx = (idx + 1) & mask;
     }
 }
 
 fn void Set.insert_assume_capacity(&self, ulong hash) {
-    ulong idx = hash % (ulong)self.entries.len;
+	ulong mask = self.entries.len - 1;
+    ulong idx = hash & mask;
 
     while (true) {
         ulong* entry = &self.entries[idx];
@@ -49,12 +51,13 @@ fn void Set.insert_assume_capacity(&self, ulong hash) {
             *entry = hash;
             return;
         }
-        idx = (idx + 1) % (ulong)self.entries.len;
+        idx = (idx + 1) & mask;
     }
 }
 
 fn bool Set.contains(&self, ulong hash) {
-    ulong idx = hash % (ulong)self.entries.len;
+	ulong mask = self.entries.len - 1;
+    ulong idx = hash & mask;
 
     while (true) {
         ulong entry = self.entries[idx];
@@ -64,7 +67,7 @@ fn bool Set.contains(&self, ulong hash) {
         if (entry == 0) {
             return false;
         }
-        idx = (idx + 1) % (ulong)self.entries.len;
+        idx = (idx + 1) & mask;
     }
 }
 
