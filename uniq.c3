@@ -47,6 +47,7 @@ fn int main(String[] args) {
 			return 1;
 		}
 		long key = line.hash();
+		assert(key != 0); // TODO someday fix/fuzz this.
 		if (filter.insert(key)) {
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);
