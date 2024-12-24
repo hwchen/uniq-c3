@@ -76,9 +76,8 @@ fn usz! StdIn.read(&self, char[] dest) @dynamic {
 fn char! StdIn.read_byte(&self) @dynamic {
     char[1] dest;
     usz n = self.read(&dest)!;
-    // TODO should read return an error?
     if (n == 0) {
-        return IoError.FILE_NOT_FOUND?;
+        return IoError.EOF?;
     }
     return dest[0];
 }
