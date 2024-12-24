@@ -16,8 +16,8 @@ fn void Set.init_capacity(&self, int capacity, Allocator alloc = allocator::heap
 
 // returns true if call sets entry. returns false if entry already exists
 fn bool Set.insert(&self, ulong hash) {
-    // max load 50%
-    if ((self.count + 1) * 2 >= self.entries.len) {
+    // max load 80%
+    if ((float)self.count * 1.25 >= self.entries.len) {
         self.realloc();
     }
     ulong idx = hash % (ulong)self.entries.len;
@@ -31,6 +31,23 @@ fn bool Set.insert(&self, ulong hash) {
             self.count += 1;
             *entry = hash;
             return true;
+        }
+        idx = (idx + 1) % (ulong)self.entries.len;
+    }
+}
+
+fn void Set.insert_assume_capacity(&self, ulong hash) {
+    ulong idx = hash % (ulong)self.entries.len;
+
+    while (true) {
+        ulong* entry = &self.entries[idx];
+        if (*entry == hash) {
+            return;
+        }
+        if (*entry == 0) {     // TODO should actually bias, in case there's a zero-value hash
+            self.count += 1;
+            *entry = hash;
+            return;
         }
         idx = (idx + 1) % (ulong)self.entries.len;
     }
@@ -59,7 +76,7 @@ fn void Set.realloc(&self) {
 	self.count = 0;
     foreach(entry:old_entries) {
 		if (entry != 0) {
-			self.insert(entry);
+			self.insert_assume_capacity(entry);
 		}
 		if (self.count == old_count) break;
     }
