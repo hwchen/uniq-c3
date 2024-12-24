@@ -10,6 +10,9 @@ struct Set {
 }
 
 fn void Set.init_capacity(&self, int capacity, Allocator alloc = allocator::heap()) {
+	// check that capacity is a power of 2
+	// TODO double-check how this and idx finding works.
+	assert((capacity & (capacity - 1)) == 0, "capacity must be a power of 2");
     self.alloc = alloc;
     self.entries = allocator::new_array(self.alloc, ulong, capacity);
 }
