@@ -29,7 +29,7 @@ fn void! main(String[] args) {
     char[1024] outbuf;
     stdout.init(&outbuf);
     set::Set filter;
-    filter.init_capacity(1024);
+    filter.init_capacity(1024, allocator::temp());
 	char[1024] line_buf;
     while (true) {
 		char[]! line = bufio::readline(in, &line_buf);

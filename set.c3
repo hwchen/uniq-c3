@@ -9,8 +9,8 @@ struct Set {
     ulong[] entries;
 }
 
-fn void Set.init_capacity(&self, int capacity) {
-    self.alloc = allocator::heap();
+fn void Set.init_capacity(&self, int capacity, Allocator alloc = allocator::heap()) {
+    self.alloc = alloc;
     self.entries = allocator::new_array(self.alloc, ulong, capacity);
 }
 
