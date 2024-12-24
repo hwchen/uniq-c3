@@ -10,6 +10,11 @@ import set;
 
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
+	if (args.len == 1) {
+		io::eprintn("Please provide one arg: `-` for stdin, else filepath");
+		return;
+	}
+
     InStream in;
     char[1024] inbuf;
     if (args[1] == "-")  {
