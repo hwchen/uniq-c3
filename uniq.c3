@@ -38,10 +38,7 @@ fn void! main(String[] args) {
 			return err?;
 		}
 		long key = line.hash();
-		if (filter.contains(key)) {
-			continue;
-		} else {
-			filter.insert(key);
+		if (filter.insert(key)) {
 			stdout.writen(line)!;
 		}
     }
