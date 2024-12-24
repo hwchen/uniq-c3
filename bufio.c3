@@ -116,5 +116,5 @@ macro char[]! readline(stream = io::stdin(), char[] buf)
 		buf[idx] = c;
 		idx += 1;
 	}
-	return buf[0..idx];
+	return buf[0:idx];
 }
