@@ -8,7 +8,7 @@ import std::hash;
 import bufio;
 import set;
 
-// TODO: Set should use bitwise ops to find index, div/% are slow.
+// TODO: The slow operation is probably reallocation. At "magic number" 4096_00 on the benchmark, on chenbot, c3 is actually a bit faster than both odin and zig. This must mean reallocation of the set is extremely slow, check what zig does.
 
 fn void! main(String[] args) {
     // very basic args handling. stdin is if called with "-", else looks for filepath
