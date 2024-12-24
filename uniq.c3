@@ -17,7 +17,7 @@ fn void! main(String[] args) {
         stdin.init(&inbuf);
         in = (InStream)&stdin;
     } else {
-        File f = io::file::open(args[1], "r")!;
+        File f = io::file::open(args[1], "rb")!;
         ReadBuffer rdr;
         rdr.init(&f, &inbuf);
         in = (InStream)&rdr;
