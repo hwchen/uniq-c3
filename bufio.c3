@@ -82,7 +82,7 @@ fn char! StdIn.read_byte(&self) @dynamic {
     return dest[0];
 }
 
-// Required because I can't seem to get StdIn to implement InStream. Copied from std.
+// reads to a buf, instead of the std lib's reading to an allocation
 macro char[]! readline(stream = io::stdin(), char[] buf)
 {
 	bool $is_stream = @typeis(stream, InStream);
