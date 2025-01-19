@@ -46,7 +46,8 @@ fn int main(String[] args) {
 			io::eprintfn("Error reading line: %s", err);
 			return 1;
 		}
-		long key = line.hash();
+		ulong key = fnv64a::encode(line);
+
 		assert(key != 0); // TODO someday fix/fuzz this.
 		if (filter.insert(key)) {
 			if (catch err = stdout.writen(line)) {
