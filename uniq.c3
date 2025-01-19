@@ -37,7 +37,7 @@ fn int main(String[] args) {
     stdout.init(&outbuf);
     set::Set filter;
 	// if we let user set init capacity, must check for power of 2
-    filter.init_capacity(8, allocator::temp());
+    filter.init_capacity(8, allocator::heap());
 	char[1024] line_buf;
     while (true) {
 		char[]! line = bufio::readline(in, &line_buf);
