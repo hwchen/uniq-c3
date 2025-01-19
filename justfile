@@ -24,7 +24,8 @@ hyperfine *args="":
 bench *args="":
     just build -O3 && poop {{args}} \
     './uniq /usr/share/dict/words' \
-    'runiq /usr/share/dict/words'
+    'runiq /usr/share/dict/words' \
+    'zuniq /usr/share/dict/words'
 
 # quick sanity check
 diff-test:
