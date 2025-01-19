@@ -11,16 +11,16 @@ run *args="":
 test:
     c3c compile-test set.c3
 
-#'zuniq /usr/share/dict/words' \
-# 4096_00 appears to be in a magic range for both ouniq and uniq-c3
-# at 1024, they also appear to be neck-and-neck
+# 4096_00 init capacity appears to be in a magic range for ouniq
+# at 2^17 for c3, it beats zuniq.
 hyperfine *args="":
     just build -O3 && hyperfine --warmup 10 {{args}} \
     './uniq /usr/share/dict/words' \
     'ouniq --initial-capacity 1024 < /usr/share/dict/words' \
-    'runiq /usr/share/dict/words'
+    'ouniq --initial-capacity 4096_00 < /usr/share/dict/words' \
+    'runiq /usr/share/dict/words' \
+    'zuniq /usr/share/dict/words'
 
-#'zuniq /usr/share/dict/words' \
 bench *args="":
     just build -O3 && poop {{args}} \
     './uniq /usr/share/dict/words' \
