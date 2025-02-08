@@ -89,7 +89,7 @@ fn void Set.realloc(&self) {
     allocator::free(self.alloc, old_entries);
 }
 
-fn void! test_set() @test {
+fn void test_set() @test {
     // Not tested: 0 value, as that's the default. Will fix when impl biasing
     Set set;
     set.init_capacity(2);
