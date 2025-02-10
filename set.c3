@@ -1,106 +1,103 @@
 module set;
 
-// Note: mem::new_array zeroes
-// On laptop, bench time went from 64ms to  44ms
-
 struct Set {
 	Allocator alloc;
-    int count;
-    ulong[] entries;
+	int count;
+	ulong[] entries;
 }
 
 fn void Set.init_capacity(&self, int capacity, Allocator alloc = allocator::heap()) {
 	// check that capacity is a power of 2
 	// TODO double-check how this and idx finding works.
 	assert((capacity & (capacity - 1)) == 0, "capacity must be a power of 2");
-    self.alloc = alloc;
-    self.entries = allocator::new_array(self.alloc, ulong, capacity);
+	self.alloc = alloc;
+	self.entries = allocator::new_array(self.alloc, ulong, capacity);
 }
 
 // returns true if call sets entry. returns false if entry already exists
 fn bool Set.insert(&self, ulong hash) {
-    // max load 80%
-    if ((float)self.count * 1.25 >= self.entries.len) {
-        self.realloc();
-    }
+	// max load 80%
+	if ((float)self.count * 1.25 >= self.entries.len) {
+		self.realloc();
+	}
 	ulong mask = self.entries.len - 1;
-    ulong idx = hash & mask;
+	ulong idx = hash & mask;
 
-    while (true) {
-        ulong* entry = &self.entries[idx];
-        if (*entry == hash) {
-            return false;
-        }
-        if (*entry == 0) {     // TODO should actually bias, in case there's a zero-value hash
-            self.count += 1;
-            *entry = hash;
-            return true;
-        }
-        idx = (idx + 1) & mask;
-    }
+	while (true) {
+		ulong* entry = &self.entries[idx];
+		if (*entry == hash) {
+			return false;
+		}
+		if (*entry == 0) { // TODO should actually bias, in case there's a zero-value hash
+			self.count += 1;
+			*entry = hash;
+			return true;
+		}
+		idx = (idx + 1) & mask;
+	}
 }
 
 fn void Set.insert_assume_capacity(&self, ulong hash) {
 	ulong mask = self.entries.len - 1;
-    ulong idx = hash & mask;
+	ulong idx = hash & mask;
 
-    while (true) {
-        ulong* entry = &self.entries[idx];
-        if (*entry == hash) {
-            return;
-        }
-        if (*entry == 0) {     // TODO should actually bias, in case there's a zero-value hash
-            self.count += 1;
-            *entry = hash;
-            return;
-        }
-        idx = (idx + 1) & mask;
-    }
+	while (true) {
+		ulong* entry = &self.entries[idx];
+		if (*entry == hash) {
+			return;
+		}
+		if (*entry == 0) { // TODO should actually bias, in case there's a zero-value hash
+			self.count += 1;
+			*entry = hash;
+			return;
+		}
+		idx = (idx + 1) & mask;
+	}
 }
 
 fn bool Set.contains(&self, ulong hash) {
 	ulong mask = self.entries.len - 1;
-    ulong idx = hash & mask;
+	ulong idx = hash & mask;
 
-    while (true) {
-        ulong entry = self.entries[idx];
-        if (entry == hash) {
-            return true;
-        }
-        if (entry == 0) {
-            return false;
-        }
-        idx = (idx + 1) & mask;
-    }
+	while (true) {
+		ulong entry = self.entries[idx];
+		if (entry == hash) {
+			return true;
+		}
+		if (entry == 0) {
+			return false;
+		}
+		idx = (idx + 1) & mask;
+	}
 }
 
 fn void Set.realloc(&self) {
-    ulong[] old_entries = self.entries;
-    self.entries = allocator::new_array(self.alloc, ulong, old_entries.len * 2);
+	ulong[] old_entries = self.entries;
+	self.entries = allocator::new_array(self.alloc, ulong, old_entries.len * 2);
 
 	usz old_count = self.count;
 	self.count = 0;
-    foreach(entry:old_entries) {
+	foreach (entry : old_entries) {
 		if (entry != 0) {
 			self.insert_assume_capacity(entry);
 		}
 		if (self.count == old_count) break;
-    }
-    allocator::free(self.alloc, old_entries);
+	}
+	allocator::free(self.alloc, old_entries);
 }
 
 fn void test_set() @test {
-    // Not tested: 0 value, as that's the default. Will fix when impl biasing
-    Set set;
-    set.init_capacity(2);
-    set.insert(1);
-    set.insert(11);
-    set.insert(11);
-    set.insert(111);
+	// Not tested: 0 value, as that's the default. Will fix when impl biasing
+	Set set;
+	set.init_capacity(2);
+	set.insert(1);
+	set.insert(11);
+	set.insert(11);
+	set.insert(111);
 
-    assert(set.contains(1));
-    assert(set.contains(11));
-    assert(set.contains(111));
-    assert(!set.contains(1111));
+	assert(set.contains(1));
+	assert(set.contains(11));
+	assert(set.contains(111));
+	assert(!set.contains(1111));
 	assert(set.count == 3);
 }

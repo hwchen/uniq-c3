@@ -4,33 +4,33 @@ import std::io;
 import std::math;
 
 struct StdOut {
-    File* stdout;
-    char[] buffer;
-    usz end;
+	File* stdout;
+	char[] buffer;
+	usz end;
 }
 
 fn void StdOut.init(&self, char[] buffer) {
-    self.stdout = std::io::stdout();
-    self.buffer = buffer;
+	self.stdout = std::io::stdout();
+	self.buffer = buffer;
 }
 
 fn usz! StdOut.writen(&self, char[] s) {
-    if (self.end + s.len + 1 >= self.buffer.len) {
-        self.stdout.write(self.buffer[0:self.end])!;
-        self.end = 0;
-    }
-    // io::printfn("%s", self.buffer[self.end:self.end]); // this causes an index out of bounds
-    // so mem::copy just uses slice to end of buffer. It should use a pointer anyways.
-    mem::copy(&self.buffer[self.end], s.ptr, s.len);
-    self.end += s.len;
-    self.buffer[self.end] = '\n';
-    self.end += 1;
-    return s.len + 1;
+	if (self.end + s.len + 1 >= self.buffer.len) {
+		self.stdout.write(self.buffer[0:self.end])!;
+		self.end = 0;
+	}
+	// io::printfn("%s", self.buffer[self.end:self.end]); // this causes an index out of bounds
+	// so mem::copy just uses slice to end of buffer. It should use a pointer anyways.
+	mem::copy(&self.buffer[self.end], s.ptr, s.len);
+	self.end += s.len;
+	self.buffer[self.end] = '\n';
+	self.end += 1;
+	return s.len + 1;
 }
 
 fn void! StdOut.flush(&self) {
-    self.stdout.write(self.buffer[0:self.end])!;
-    self.end = 0;
+	self.stdout.write(self.buffer[0:self.end])!;
+	self.end = 0;
 }
 
 struct BufReader {
@@ -71,7 +71,7 @@ macro char[]! readline(stream = BufReader, char[] buf)
 {
 	char val = stream.read_byte()!;
 
-    if (val == '\n') return "";
+	if (val == '\n') return "";
 
 	if (val != '\r') buf[0] = val;
 
