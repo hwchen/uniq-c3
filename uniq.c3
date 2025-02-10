@@ -15,21 +15,17 @@ fn int main(String[] args) {
 		return 1;
 	}
 
-    InStream in;
+    BufReader in;
     char[4096] inbuf;
     if (args[1] == "-")  {
-        bufio::StdIn stdin;
-        stdin.init(&inbuf);
-        in = (InStream)&stdin;
+        in.init(io::stdin(), &inbuf);
     } else {
         File! f = io::file::open(args[1], "rb");
 		if (catch err = f) {
 			io::eprintfn("Error opening file %s: %s", args[1], err);
 			return 1;
 		}
-        ReadBuffer rdr;
-        rdr.init(&f, &inbuf);
-        in = (InStream)&rdr;
+        in.init(&f, &inbuf);
     }
 
     bufio::StdOut stdout;
@@ -40,7 +36,7 @@ fn int main(String[] args) {
     filter.init_capacity(8, allocator::heap());
 	char[1024] line_buf;
     while (true) {
-		char[]! line = bufio::readline(in, &line_buf);
+		char[]! line = bufio::readline(&in, &line_buf);
 		if (catch err = line) {
 			if (err == IoError.EOF) break;
 			io::eprintfn("Error reading line: %s", err);

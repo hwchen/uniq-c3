@@ -33,65 +33,43 @@ fn void! StdOut.flush(&self) {
     self.end = 0;
 }
 
-struct StdIn (InStream) {
-    File* stdin;
-    char[] buffer;
-    usz start;
-    usz end;
+struct BufReader {
+	InStream wrapped_stream;
+	char[] bytes;
+	usz read_idx;
+	usz write_idx;
 }
 
-fn void StdIn.init(&self, char[]buf) {
-    self.stdin = std::io::stdin();
-    self.buffer = buf;
+fn void BufReader.init(&self, InStream stream, char[] buf) {
+	self.wrapped_stream = stream;
+	self.bytes = buf;
 }
 
-fn usz! StdIn.read(&self, char[] dest) @dynamic {
-    usz dest_index = 0;
-
-    while (dest_index < dest.len) {
-        usz written = math::min(dest.len - dest_index, self.end - self.start);
-        mem::copy(dest[dest_index..], self.buffer[self.start..], written);
-        // somehow a read is still triggered even when we haven't gotten through the buffer yet
-        // Looks like it's after an endline. Is there some weird interaction with treadline? Yes,
-        // I had to pass StdIn to readline by pointer; doing it by value passed in a copy of the original
-        // each time. Not sure why it was easy to miss this. I guess in Odin one struct controls the state,
-        // but here it's passing a struct to a function.
-        if (written == 0) {
-            // buf empty, fill it
-            usz n = self.stdin.read(self.buffer)!;
-            if (n == 0) {
-                // reading from the unbuffered stream returned nothing
-                // so we have nothing left to read.
-                return dest_index;
-            }
-            self.start = 0;
-            self.end = n;
-        }
-        self.start += written;
-        dest_index += written;
-    }
-    return dest.len;
+fn char! BufReader.read_byte(&self)
+{
+	if (self.read_idx == self.write_idx) {
+		self.refill()!;
+		if (self.read_idx == self.write_idx) return IoError.EOF?;
+	}
+	char c = self.bytes[self.read_idx];
+	self.read_idx++;
+	return c;
 }
 
-fn char! StdIn.read_byte(&self) @dynamic {
-    char[1] dest;
-    usz n = self.read(&dest)!;
-    if (n == 0) {
-        return IoError.EOF?;
-    }
-    return dest[0];
+fn void! BufReader.refill(&self) @local @inline
+{
+	self.read_idx = 0;
+	self.write_idx = self.wrapped_stream.read(self.bytes)!;
+}
+
+fn void! BufReader.close(&self) {
+	return self.wrapped_stream.close();
 }
 
 // reads to a buf, instead of the std lib's reading to an allocation
-macro char[]! readline(stream = io::stdin(), char[] buf)
+macro char[]! readline(stream = BufReader, char[] buf)
 {
-	bool $is_stream = @typeis(stream, InStream);
-	$if $is_stream:
-		$typeof(&stream.read_byte) func = &stream.read_byte;
-		char val = func((void*)stream)!;
-	$else
-		char val = stream.read_byte()!;
-	$endif
+	char val = stream.read_byte()!;
 
     if (val == '\n') return "";
 
@@ -100,11 +78,7 @@ macro char[]! readline(stream = io::stdin(), char[] buf)
 	usz idx = 1;
 	while (1)
 	{
-		$if $is_stream:
-			char! c = func((void*)stream);
-		$else
-			char! c = stream.read_byte();
-		$endif
+		char! c = stream.read_byte();
 		if (catch err = c)
 		{
 			if (err == IoError.EOF) break;
