@@ -16,7 +16,7 @@ fn int main(String[] args) {
 	}
 
     InStream in;
-    char[1024] inbuf;
+    char[4096] inbuf;
     if (args[1] == "-")  {
         bufio::StdIn stdin;
         stdin.init(&inbuf);
@@ -33,7 +33,7 @@ fn int main(String[] args) {
     }
 
     bufio::StdOut stdout;
-    char[1024] outbuf;
+    char[4096] outbuf;
     stdout.init(&outbuf);
     set::Set filter;
 	// if we let user set init capacity, must check for power of 2
