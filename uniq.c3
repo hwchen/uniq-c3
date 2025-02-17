@@ -31,7 +31,7 @@ fn int main(String[] args) {
 	bufio::StdOut stdout;
 	char[4096] outbuf;
 	stdout.init(&outbuf);
-	UnorderedMap(<ulong, bool>) filter;
+	UnorderedMap(<char[], bool>) filter;
 	// if we let user set init capacity, must check for power of 2
 	filter.init(allocator::heap());
 	char[1024] line_buf;
@@ -42,10 +42,7 @@ fn int main(String[] args) {
 			io::eprintfn("Error reading line: %s", err);
 			return 1;
 		}
-		ulong key = fnv64a::encode(line);
-
-		assert(key != 0); // TODO someday fix/fuzz this.
-		if (filter.set(key, true)) {
+		if (filter.set(line, true)) {
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);
 			}
