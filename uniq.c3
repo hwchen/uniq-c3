@@ -6,7 +6,7 @@ import std::io;
 import std::hash;
 
 import bufio;
-import set;
+import unordered_map;
 
 fn int main(String[] args) {
 	// very basic args handling. stdin is if called with "-", else looks for filepath
@@ -31,9 +31,9 @@ fn int main(String[] args) {
 	bufio::StdOut stdout;
 	char[4096] outbuf;
 	stdout.init(&outbuf);
-	set::Set filter;
+	UnorderedMap(<ulong, bool>) filter;
 	// if we let user set init capacity, must check for power of 2
-	filter.init_capacity(8, allocator::heap());
+	filter.init(allocator::heap());
 	char[1024] line_buf;
 	while (true) {
 		char[]! line = bufio::readline(&in, &line_buf);
@@ -45,7 +45,7 @@ fn int main(String[] args) {
 		ulong key = fnv64a::encode(line);
 
 		assert(key != 0); // TODO someday fix/fuzz this.
-		if (filter.insert(key)) {
+		if (filter.set(key, true)) {
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);
 			}
