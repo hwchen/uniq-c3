@@ -16,7 +16,7 @@ fn int main(String[] args) {
 	}
 
 	BufReader in;
-	char[4096] inbuf;
+	char[4096 *8] inbuf;
 	if (args[1] == "-")  {
 		in.init(io::stdin(), &inbuf);
 	} else {
