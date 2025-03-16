@@ -20,7 +20,7 @@ fn int main(String[] args) {
 	if (args[1] == "-")  {
 		in.init(io::stdin(), &inbuf);
 	} else {
-		File! f = io::file::open(args[1], "rb");
+		File? f = io::file::open(args[1], "rb");
 		if (catch err = f) {
 			io::eprintfn("Error opening file %s: %s", args[1], err);
 			return 1;
@@ -31,7 +31,7 @@ fn int main(String[] args) {
 	bufio::StdOut stdout;
 	char[4096] outbuf;
 	stdout.init(&outbuf);
-	UnorderedMap(<char[], bool>) filter;
+	UnorderedMap{char[], bool} filter;
 	filter.init(allocator::heap());
 
 	// Note that if we use line_buf only instead of allocating for each line,
@@ -48,13 +48,13 @@ fn int main(String[] args) {
 	// a bump up and bump down.
 	char[1024] line_buf;
 	while (true) {
-		char[]! line = bufio::readline(&in, &line_buf);
+		char[]? line = bufio::readline(&in, &line_buf);
 		if (catch err = line) {
-			if (err == IoError.EOF) break;
+			if (err == io::EOF) break;
 			io::eprintfn("Error reading line: %s", err);
 			return 1;
 		}
-		String key = ((String)line).copy();
+		String key = ((String)line).copy(mem);
 		if (filter.set(key, true)) {
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);

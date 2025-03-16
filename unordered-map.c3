@@ -1,7 +1,7 @@
 <*
- @require $defined(Key{}.myhash()) `No .myhash function found on the key`
+ @require $defined((Key){}.myhash()) `No .myhash function found on the key`
 *>
-module unordered_map(<Key, Value>);
+module unordered_map{Key, Value};
 import std::collections::list;
 import std::io;
 import hash;
@@ -11,15 +11,25 @@ struct Entry {
 	Value value;
 }
 
+// uses high 7 bits of hash for fingerprint, as low bits are
+// already used to find the index.
 bitstruct Metadata: char {
-	bool used: 0;
-	char fingerprint: 1..7;
+	char fingerprint: 0..6;
+	bool used: 7;
 }
 
-// uses high 7 bits of has for fingerprint, as low bits are
-// already used to find the index.
-fn void Metadata.set_fingerprint(&m, ulong hash) {
-	m.fingerprint = (char)(hash >> (64 - 7));
+fn char take_fingerprint(ulong hash) @inline {
+	return (char)(hash >> (64 - 7));
+}
+
+fn void Metadata.set_tombstone(&m) @inline {
+	m.fingerprint = 1;
+	m.used = false;
+}
+
+fn bool Metadata.is_tombstone(m) @inline {
+	// depends on layout of bitstruct
+	return (char)m == 1;
 }
 
 // Does not handle empty strings as keys.
@@ -39,7 +49,7 @@ fn void UnorderedMap.init(&self, Allocator allocator, int capacity = 16) {
 	self.entries = allocator::new_array(self.allocator, Entry, capacity);
 }
 
-fn void UnorderedMap.temp_init(&self, int capacity = 16) {
+fn void UnorderedMap.tinit(&self, int capacity = 16) {
 	self.init(allocator::temp());
 }
 
@@ -75,17 +85,18 @@ fn bool UnorderedMap.add_entry(&self, Key key, Value value) @local {
 	ulong hash = key.myhash();
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
+	char fingerprint = take_fingerprint(hash);
+
 	while (true) {
 		if (!self.metadatas[idx].used) {
 			self.metadatas[idx].used = true;
-			self.metadatas[idx].set_fingerprint(hash);
+			self.metadatas[idx].fingerprint = fingerprint;
 			self.count += 1;
 			self.entries[idx].key = key;
 			self.entries[idx].value = value;
 			return true;
 		}
 
-		char fingerprint = (char)(hash >> (64 - 7));
 		if (self.metadatas[idx].fingerprint == fingerprint) {
 			Key k = self.entries[idx].key;
 			if (k == key) {
@@ -98,17 +109,17 @@ fn bool UnorderedMap.add_entry(&self, Key key, Value value) @local {
 	}
 }
 
-fn Value*! UnorderedMap.get_ref(&self, Key key) {
-	if (!self.count) return SearchResult.MISSING?;
+fn Value*? UnorderedMap.get_ref(&self, Key key) {
+	if (!self.count) return NOT_FOUND?;
 	ulong hash = key.myhash();
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
+	char fingerprint = take_fingerprint(hash);
 
 	while (true) {
 		if (!self.metadatas[idx].used) {
-			return SearchResult.MISSING?;
+			return NOT_FOUND?;
 		}
-		char fingerprint = (char)(hash >> (64 - 7));
 		if (self.metadatas[idx].fingerprint == fingerprint) {
 			Key k = self.entries[idx].key;
 			if (k == key) {
@@ -131,17 +142,17 @@ fn Value* UnorderedMap.get_ref_or_default(&self, Key key, Value default_value) {
 	ulong hash = key.myhash();
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
+	char fingerprint = take_fingerprint(hash);
 
 	while (true) {
 		if (!self.metadatas[idx].used) {
 			self.metadatas[idx].used = true;
-			self.metadatas[idx].set_fingerprint(hash);
+			self.metadatas[idx].fingerprint = fingerprint;
 			self.count += 1;
 			self.entries[idx].key = key;
 			self.entries[idx].value = default_value;
 			return &self.entries[idx].value;
 		}
-		char fingerprint = (char)(hash >> (64 - 7));
 		if (self.metadatas[idx].fingerprint == fingerprint) {
 			Key k = self.entries[idx].key;
 			if (k == key) {
@@ -152,8 +163,8 @@ fn Value* UnorderedMap.get_ref_or_default(&self, Key key, Value default_value) {
 	}
 }
 
-fn Value! UnorderedMap.get(&self, Key key) {
-	return *self.get_ref(key);
+fn Value? UnorderedMap.get(&self, Key key) {
+	return *self.get_ref(key) @inline;
 }
 
 fn bool UnorderedMap.has_key(&self, Key key) {
@@ -200,30 +211,33 @@ fn usz UnorderedMap.len(&map) @inline {
 	return map.count;
 }
 
-fn void! UnorderedMap.remove(&self, Key key) @maydiscard {
-	if (!self.count) return SearchResult.MISSING?;
+fn void? UnorderedMap.remove(&self, Key key) @maydiscard {
+	if (!self.count) return NOT_FOUND?;
 	ulong hash = key.myhash();
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
+	char fingerprint = take_fingerprint(hash);
 
 	while (true) {
-		if (!self.metadatas[idx].used) {
-			return SearchResult.MISSING?;
+		switch {
+			case self.metadatas[idx].is_tombstone():
+				break;
+			case !self.metadatas[idx].used:
+				return NOT_FOUND?;
+			case self.metadatas[idx].fingerprint == fingerprint:
+				if (self.entries[idx].key == key) {
+					self.metadatas[idx].set_tombstone();
+					self.count -= 1;
+					return;
+				}
 		}
-		// TODO use fingerprint
-		Key k = self.entries[idx].key;
-		if (k == key) {
-			self.metadatas[idx].used = false;
-			self.count -= 1;
-			return;
-		}
-		idx = (idx + 1) % self.metadatas.len;
+		idx = (idx + 1) & mask;
 	}
 }
 
 // Shallow copy on keys string data, only copies the fat pointer.
 fn UnorderedMap UnorderedMap.copy(&old, Allocator allocator) {
-	UnorderedMap(<Key, Value>) new;
+	UnorderedMap{Key, Value} new;
 	new.allocator = allocator;
 	new.count = old.count;
 	new.metadatas = allocator::new_array(new.allocator, Metadata, old.metadatas.len);
@@ -243,7 +257,7 @@ fn void UnorderedMap.clear(&self) {
 	self.count = 0;
 }
 
-fn usz! UnorderedMap.to_format(&self, Formatter* f) @dynamic {
+fn usz? UnorderedMap.to_format(&self, Formatter* f) @dynamic {
 	usz len;
 	len += f.print("{ ")!;
 	self.@each_entry(; Entry entry) {
