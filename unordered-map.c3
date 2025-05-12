@@ -237,7 +237,7 @@ fn void? UnorderedMap.remove(&self, Key key) @maydiscard {
 
 // Shallow copy on keys string data, only copies the fat pointer.
 fn UnorderedMap UnorderedMap.copy(&old, Allocator allocator) {
-	UnorderedMap{Key, Value} new;
+	UnorderedMap new;
 	new.allocator = allocator;
 	new.count = old.count;
 	new.metadatas = allocator::new_array(new.allocator, Metadata, old.metadatas.len);
