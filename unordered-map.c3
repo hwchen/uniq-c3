@@ -1,5 +1,5 @@
 <*
- @require $defined ((Key){}.myhash()) : `No .myhash function found on the key`
+ @require $defined((Key){}.myhash()) `No .myhash function found on the key`
 *>
 module unordered_map{Key, Value};
 import std::collections::list;
@@ -40,7 +40,7 @@ struct UnorderedMap (Printable) {
 	Entry[] entries;
 }
 
-fn void UnorderedMap.init(&self, Allocator allocator, int capacity = 16) {
+fn void UnorderedMap.init(&self, Allocator allocator, usz capacity = 16) {
 	// check that capacity is a power of 2
 	assert((capacity & (capacity - 1)) == 0, "capacity must be a power of 2");
 
@@ -50,7 +50,7 @@ fn void UnorderedMap.init(&self, Allocator allocator, int capacity = 16) {
 }
 
 fn void UnorderedMap.tinit(&self, int capacity = 16) {
-	self.init(allocator::temp());
+	self.init(tmem);
 }
 
 fn bool UnorderedMap.is_initialized(&self) {
@@ -71,7 +71,7 @@ fn bool UnorderedMap.is_empty(self) {
 fn bool UnorderedMap.set(&self, Key key, Value value) @operator([]=) {
 	// If the map isn't initialized, use the defaults to initialize it.
 	if (!self.allocator) {
-		self.init(allocator::heap());
+		self.init(tmem);
 	}
 	// max load 80%
 	if ((float)self.count * 1.25 >= self.metadatas.len) {
@@ -133,7 +133,7 @@ fn Value*? UnorderedMap.get_ref(&self, Key key) {
 fn Value* UnorderedMap.get_ref_or_default(&self, Key key, Value default_value) {
 	// If the map isn't initialized, use the defaults to initialize it.
 	if (!self.allocator) {
-		self.init(allocator::heap());
+		self.init(tmem);
 	}
 	// max load 80%
 	if ((float)self.count * 1.25 >= self.metadatas.len) {
