@@ -32,7 +32,7 @@ fn int main(String[] args) {
 	char[4096] outbuf;
 	stdout.init(&outbuf);
 	UnorderedMap{char[], bool} filter;
-	filter.init(allocator::heap());
+	filter.init(mem);
 
 	BackedArenaAllocator* key_arena = allocator::new_backed_allocator(4096 * 8, mem)!!;
 
