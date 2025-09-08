@@ -18,7 +18,7 @@ build "uniq" {
 build "testrun" {
     from glob "*.c3"
     # Compiles and runs, ok for now because running tests is fast
-    run "c3c compile-test --no-run <in*> -o <out>"
+    run "c3c compile-test --suppress-run <in*> -o <out>"
 }
 
 task build {

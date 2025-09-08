@@ -6,7 +6,7 @@ import std::io;
 import std::hash;
 
 import bufio;
-import unordered_map;
+import set;
 
 fn int main(String[] args) {
 	// very basic args handling. stdin is if called with "-", else looks for filepath
@@ -31,7 +31,7 @@ fn int main(String[] args) {
 	bufio::StdOut stdout;
 	char[4096] outbuf;
 	stdout.init(&outbuf);
-	UnorderedMap{char[], bool} filter;
+	Set{char[]} filter;
 	filter.init(mem);
 
 	BackedArenaAllocator* key_arena = allocator::new_backed_allocator(4096 * 8, mem)!!;
@@ -46,7 +46,7 @@ fn int main(String[] args) {
 		}
 		usz mark = key_arena.mark();
 		String key = ((String)line).copy(key_arena);
-		if (filter.set(key, true)) {
+		if (filter.insert(key)) {
 			key_arena.reset(mark);
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);
