@@ -34,18 +34,8 @@ fn int main(String[] args) {
 	UnorderedMap{char[], bool} filter;
 	filter.init(allocator::heap());
 
-	// Note that if we use line_buf only instead of allocating for each line,
-	// we're still effectively using the digest-hash strategy (as there's no
-	// way to check for equality of the key). Also, when there's a collisions,
-	// whether the key is-equal depends on whether the length of the previous view
-	// into the buffer is the same as the current one. So it's kind of a crap shoot.
-	//
-	// But, there's still a way to do better than allocating all lines. We can only
-	// allocate when setting a new key. This will have a big benefit if there's many
-	// key collisions.
-	//
-	// I guess you can also immediately free, which should be pretty fast if it is just
-	// a bump up and bump down.
+	BackedArenaAllocator* key_arena = allocator::new_backed_allocator(4096 * 8, mem)!!;
+
 	char[1024] line_buf;
 	while (true) {
 		char[]? line = bufio::readline(&in, &line_buf);
@@ -54,8 +44,10 @@ fn int main(String[] args) {
 			io::eprintfn("Error reading line: %s", err);
 			return 1;
 		}
-		String key = ((String)line).copy(mem);
+		usz mark = key_arena.mark();
+		String key = ((String)line).copy(key_arena);
 		if (filter.set(key, true)) {
+			key_arena.reset(mark);
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);
 			}
