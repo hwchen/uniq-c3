@@ -114,8 +114,20 @@ fn void Wyhash.small_key(&self, char[] input) @inline {
 
 fn void Wyhash.round(&self, char[] input) @inline {
 	assert(input.len == 48);
-	// TODO inline
-	for (int i; i < 3; i += 1) {
+	{
+		int i = 0;
+		ulong a = @read(ULongLE, input[8 * (2 * i) ..]);
+		ulong b = @read(ULongLE, input[8 * (2 * i + 1) ..]);
+		self.state[i] = mix(a ^ WYHASH_SECRET[i + 1], b ^ self.state[i]);
+	}
+	{
+		int i = 1;
+		ulong a = @read(ULongLE, input[8 * (2 * i) ..]);
+		ulong b = @read(ULongLE, input[8 * (2 * i + 1) ..]);
+		self.state[i] = mix(a ^ WYHASH_SECRET[i + 1], b ^ self.state[i]);
+	}
+	{
+		int i = 2;
 		ulong a = @read(ULongLE, input[8 * (2 * i) ..]);
 		ulong b = @read(ULongLE, input[8 * (2 * i + 1) ..]);
 		self.state[i] = mix(a ^ WYHASH_SECRET[i + 1], b ^ self.state[i]);
