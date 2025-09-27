@@ -2,6 +2,7 @@ module bufio;
 
 import std::io;
 import std::math;
+import libc;
 
 struct StdOut {
 	File* stdout;
@@ -62,33 +63,59 @@ fn void? BufReader.refill(&self) @local @inline
 	self.write_idx = self.wrapped_stream.read(self.bytes)!;
 }
 
+// advances the read_idx by n bytes.
+// triggers a read if necessary.
+// Should advance beyond write_idx, but only checks in debug.
+fn void? BufReader.advance(&self, usz n) {
+	self.read_idx += n;
+	// leaving this in cause undefined behavior under release?
+	//assert(self.read_idx > self.write_idx);
+	if (self.read_idx == self.write_idx) {
+		self.refill()!;
+		if (self.read_idx == self.write_idx) return io::EOF?;
+	}
+}
+
+fn char[] BufReader.buffer(&self) @inline {
+	return self.bytes[self.read_idx..self.write_idx-1];
+}
+
+
 fn void? BufReader.close(&self) {
 	return self.wrapped_stream.close();
 }
 
 // reads to a buf, instead of the std lib's reading to an allocation
-macro char[]? readline(stream = BufReader, char[] buf)
+// Now also uses memchr
+// TODO double-check all the `advance` are correct
+// TODO use BufReader buffer directly
+macro char[]? readline(rdr = BufReader, char[] out_buf)
 {
-	char val = stream.read_byte()!;
+	rdr.advance(0)!;
 
-	if (val == '\n') return "";
-
-	if (val != '\r') buf[0] = val;
-
-	usz idx = 1;
-	while (1)
-	{
-		char? c = stream.read_byte();
-		if (catch err = c)
-		{
-			if (err == io::EOF) break;
-			return err?;
-		}
-		if (c == '\r') continue;
-		if (c == '\n') break;
-		if (idx >= buf.len) return io::OUT_OF_SPACE?;
-		buf[idx] = c;
-		idx += 1;
+	char[] buf = rdr.buffer();
+	if (buf.len == 0) {
+		return io::EOF?;
 	}
-	return buf[0:idx];
+	int out_buf_idx = 0;
+
+	while (true) {
+		void* end_label_ptr = libc::memchr(buf.ptr, '\n', buf.len);
+		if (end_label_ptr == null) {
+			// TODO buffer overflow
+			out_buf[out_buf_idx:buf.len] = buf[..];
+			out_buf_idx += buf.len;
+			rdr.advance(buf.len)!!;
+			buf = rdr.buffer();
+		} else {
+			int label_len = (int)(end_label_ptr - buf.ptr);
+			// TODO buffer overflow
+			out_buf[out_buf_idx:label_len] = buf[0:label_len];
+			out_buf_idx += label_len;
+			rdr.advance((usz)(label_len + 1))!;
+			break;
+		}
+	}
+	return out_buf[:out_buf_idx];
+
 }
