@@ -1,7 +1,7 @@
 set shell := ["bash", "-uc"]
 
 hyperfine *args="":
-    werk build -Dprofile=release && hyperfine --warmup 10 {{args}} \
+    werk build -Dprofile=release && hyperfine --warmup 200 {{args}} \
     './target/uniq /usr/share/dict/words' \
     'ouniq /usr/share/dict/words' \
     'zuniq /usr/share/dict/words'
