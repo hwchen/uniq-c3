@@ -6,6 +6,7 @@ hyperfine *args="":
     'ouniq /usr/share/dict/words' \
     'zuniq /usr/share/dict/words'
 
+# Note that order matters, because on new laptop there's not enough warmup
 bench *args="":
     werk build -Dprofile=release && poop {{args}} \
     './target/uniq /usr/share/dict/words' \
