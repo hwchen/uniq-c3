@@ -18,3 +18,6 @@ bench *args="":
 # quick sanity check
 diff-test:
     werk build && diff <(./target/uniq - < /usr/share/dict/words) <(cat /usr/share/dict/words)
+
+words:
+    werk build && ./target/uniq - < /usr/share/dict/words
