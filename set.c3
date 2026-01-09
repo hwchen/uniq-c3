@@ -1,12 +1,11 @@
-<*
- @require $defined((Key){}.myhash()) : `No .myhash function found on the key`
-*>
-module set{Key};
+module set;
 import std::io;
-import hash;
+import wyhash;
+
+macro ulong char[].myhash(char[] c) => wyhash::hash(0, c);
 
 struct Entry {
-	Key key;
+	char[] key;
 }
 
 // uses high 7 bits of hash for fingerprint, as low bits are
@@ -66,7 +65,7 @@ fn bool Set.is_empty(self) {
 }
 
 // returns true if entry already exists.
-fn bool Set.insert(&self, Key key) {
+fn bool Set.insert(&self, char[] key) {
 	// If the map isn't initialized, use the defaults to initialize it.
 	if (!self.allocator) {
 		self.init(tmem);
@@ -79,7 +78,7 @@ fn bool Set.insert(&self, Key key) {
 	return self.add_entry(key);
 }
 
-fn bool Set.add_entry(&self, Key key) @local {
+fn bool Set.add_entry(&self, char[] key) @local {
 	ulong hash = key.myhash();
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
@@ -95,7 +94,7 @@ fn bool Set.add_entry(&self, Key key) @local {
 		}
 
 		if (self.metadatas[idx].fingerprint == fingerprint) {
-			Key k = self.entries[idx].key;
+			char[] k = self.entries[idx].key;
 			if (k == key) {
 				return false;
 			}
@@ -128,7 +127,7 @@ fn usz Set.len(&map) @inline {
 	return map.count;
 }
 
-fn void? Set.remove(&self, Key key) @maydiscard {
+fn void? Set.remove(&self, char[] key) @maydiscard {
 	if (!self.count) return NOT_FOUND?;
 	ulong hash = key.myhash();
 	ulong mask = self.metadatas.len - 1;

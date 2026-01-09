@@ -31,7 +31,7 @@ fn int main(String[] args) {
 	bufio::StdOut stdout;
 	char[4096] outbuf;
 	stdout.init(&outbuf);
-	Set{char[]} filter;
+	Set filter;
 	filter.init(mem);
 
 	BackedArenaAllocator* key_arena = allocator::new_backed_allocator(4096 * 8, mem)!!;
