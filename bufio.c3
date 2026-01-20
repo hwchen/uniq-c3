@@ -112,7 +112,13 @@ macro char[]? readline(rdr = BufReader, char[] out_buf)
 			// TODO buffer overflow
 			out_buf[out_buf_idx:label_len] = buf[0:label_len];
 			out_buf_idx += label_len;
-			rdr.advance((usz)(label_len + 1))!;
+			// ignore EOF here, handle on next readline
+			if (catch err = rdr.advance((usz)(label_len + 1))) {
+				if (err != io::EOF) {
+					return err?;
+				}
+			}
+			buf = rdr.buffer();
 			break;
 		}
 	}
