@@ -34,8 +34,6 @@ fn int main(String[] args) {
 	Set filter;
 	filter.init(mem);
 
-	BackedArenaAllocator* key_arena = allocator::new_backed_allocator(4096 * 8, mem)!!;
-
 	char[1024] line_buf;
 	while (true) {
 		char[]? line = bufio::readline(&in, &line_buf);
@@ -44,10 +42,8 @@ fn int main(String[] args) {
 			io::eprintfn("Error reading line: %s", err);
 			return 1;
 		}
-		usz mark = key_arena.mark();
-		String key = ((String)line).copy(key_arena);
+		String key = ((String)line).copy(mem);
 		if (filter.insert(key)) {
-			key_arena.reset(mark);
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);
 			}
