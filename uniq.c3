@@ -34,6 +34,9 @@ fn int main(String[] args) {
 	Set filter;
 	filter.init(mem);
 
+	DynamicArenaAllocator key_arena;
+	key_arena.init(mem, 4096 * 8);
+
 	char[1024] line_buf;
 	while (true) {
 		char[]? line = bufio::readline(&in, &line_buf);
@@ -42,8 +45,10 @@ fn int main(String[] args) {
 			io::eprintfn("Error reading line: %s", err);
 			return 1;
 		}
-		String key = ((String)line).copy(mem);
-		if (filter.insert(key)) {
+		ulong hash = ((String)line).myhash();
+		if (!filter.contains_prehashed(hash, (String)line)) {
+			String key = ((String)line).copy(&key_arena);
+			filter.insert_prehashed(hash, key);
 			if (catch err = stdout.writen(line)) {
 				io::eprintfn("Error writing to stdout: %s", err);
 			}

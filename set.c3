@@ -64,8 +64,29 @@ fn bool Set.is_empty(self) {
 	return self.count == 0;
 }
 
+fn bool Set.contains_prehashed(&self, ulong hash, char[] key) {
+	ulong mask = self.metadatas.len - 1;
+	ulong idx = hash & mask;
+	char fingerprint = take_fingerprint(hash);
+
+	while (true) {
+		if (!self.metadatas[idx].used) {
+			return false;
+		}
+
+		if (self.metadatas[idx].fingerprint == fingerprint) {
+			char[] k = self.entries[idx].key;
+			if (k == key) {
+				return true;
+			}
+		}
+
+		idx = (idx + 1) & mask;
+	}
+}
+
 // returns true if entry already exists.
-fn bool Set.insert(&self, char[] key) {
+fn bool Set.insert_prehashed(&self, ulong hash, char[] key) {
 	// If the map isn't initialized, use the defaults to initialize it.
 	if (!self.allocator) {
 		self.init(tmem);
@@ -75,11 +96,10 @@ fn bool Set.insert(&self, char[] key) {
 		self.reallocator();
 	}
 
-	return self.add_entry(key);
+	return self.add_entry_prehashed(hash, key);
 }
 
-fn bool Set.add_entry(&self, char[] key) @local {
-	ulong hash = key.myhash();
+fn bool Set.add_entry_prehashed(&self, ulong hash, char[] key) @local {
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
 	char fingerprint = take_fingerprint(hash);
@@ -114,7 +134,8 @@ fn void Set.reallocator(&self) {
 	self.count = 0;
 	foreach (idx, metadata : old_metadatas) {
 		if (metadata.used) {
-			self.add_entry(old_entries[idx].key);
+			ulong hash = old_entries[idx].key.myhash();
+			self.add_entry_prehashed(hash, old_entries[idx].key);
 		}
 		if (self.count == old_count) break;
 	}
