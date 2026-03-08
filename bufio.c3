@@ -50,7 +50,7 @@ fn char? BufReader.read_byte(&self)
 {
 	if (self.read_idx == self.write_idx) {
 		self.refill()!;
-		if (self.read_idx == self.write_idx) return io::EOF?;
+		if (self.read_idx == self.write_idx) return io::EOF~;
 	}
 	char c = self.bytes[self.read_idx];
 	self.read_idx++;
@@ -72,7 +72,7 @@ fn void? BufReader.advance(&self, usz n) {
 	//assert(self.read_idx > self.write_idx);
 	if (self.read_idx == self.write_idx) {
 		self.refill()!;
-		if (self.read_idx == self.write_idx) return io::EOF?;
+		if (self.read_idx == self.write_idx) return io::EOF~;
 	}
 }
 
@@ -95,7 +95,7 @@ macro char[]? readline(rdr = BufReader, char[] out_buf)
 
 	char[] buf = rdr.buffer();
 	if (buf.len == 0) {
-		return io::EOF?;
+		return io::EOF~;
 	}
 	int out_buf_idx = 0;
 
@@ -115,7 +115,7 @@ macro char[]? readline(rdr = BufReader, char[] out_buf)
 			// ignore EOF here, handle on next readline
 			if (catch err = rdr.advance((usz)(label_len + 1))) {
 				if (err != io::EOF) {
-					return err?;
+					return err~;
 				}
 			}
 			buf = rdr.buffer();

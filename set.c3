@@ -149,7 +149,7 @@ fn usz Set.len(&map) @inline {
 }
 
 fn void? Set.remove(&self, char[] key) @maydiscard {
-	if (!self.count) return NOT_FOUND?;
+	if (!self.count) return NOT_FOUND~;
 	ulong hash = key.myhash();
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
@@ -160,7 +160,7 @@ fn void? Set.remove(&self, char[] key) @maydiscard {
 			case self.metadatas[idx].is_tombstone():
 				break;
 			case !self.metadatas[idx].used:
-				return NOT_FOUND?;
+				return NOT_FOUND~;
 			case self.metadatas[idx].fingerprint == fingerprint:
 				if (self.entries[idx].key == key) {
 					self.metadatas[idx].set_tombstone();
