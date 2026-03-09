@@ -16,7 +16,7 @@ fn int main(String[] args) {
 	}
 
 	BufReader in;
-	char[4096 *8] inbuf;
+	char[4096 * 8] inbuf;
 	if (args[1] == "-")  {
 		in.init(io::stdin(), &inbuf);
 	} else {
@@ -29,7 +29,7 @@ fn int main(String[] args) {
 	}
 
 	bufio::StdOut stdout;
-	char[4096] outbuf;
+	char[4096 * 8] outbuf;
 	stdout.init(&outbuf);
 	Set filter;
 	filter.init(mem);
