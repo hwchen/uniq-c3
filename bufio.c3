@@ -55,7 +55,7 @@ fn char? BufReader.read_byte(&self)
 	return c;
 }
 
-fn void? BufReader.refill(&self) @local @inline
+fn void? BufReader.refill(&self) @inline
 {
 	self.read_idx = 0;
 	self.write_idx = self.wrapped_stream.read(self.bytes)!;

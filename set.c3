@@ -42,8 +42,8 @@ fn void Set.init(&self, Allocator allocator, usz capacity = 16) {
 	assert((capacity & (capacity - 1)) == 0, "capacity must be a power of 2");
 
 	self.allocator = allocator;
-	self.metadatas = allocator::new_array(self.allocator, Metadata, capacity);
-	self.entries = allocator::new_array(self.allocator, Entry, capacity);
+	self.metadatas = alloc::new_array(self.allocator, Metadata, capacity);
+	self.entries = alloc::new_array(self.allocator, Entry, capacity);
 }
 
 fn void Set.tinit(&self, int capacity = 16) {
@@ -56,8 +56,8 @@ fn bool Set.is_initialized(&self) {
 
 fn void Set.free(&self) {
 	if (!self.allocator) return;
-	allocator::free(self.allocator, self.metadatas);
-	allocator::free(self.allocator, self.entries);
+	alloc::free(self.allocator, self.metadatas);
+	alloc::free(self.allocator, self.entries);
 }
 
 fn bool Set.is_empty(self) {
@@ -99,7 +99,7 @@ fn bool Set.insert_prehashed(&self, ulong hash, char[] key) {
 	return self.add_entry_prehashed(hash, key);
 }
 
-fn bool Set.add_entry_prehashed(&self, ulong hash, char[] key) @local {
+fn bool Set.add_entry_prehashed(&self, ulong hash, char[] key) {
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
 	char fingerprint = take_fingerprint(hash);
@@ -126,9 +126,9 @@ fn bool Set.add_entry_prehashed(&self, ulong hash, char[] key) @local {
 
 fn void Set.reallocator(&self) {
 	Metadata[] old_metadatas = self.metadatas;
-	self.metadatas = allocator::new_array(self.allocator, Metadata, old_metadatas.len * 2);
+	self.metadatas = alloc::new_array(self.allocator, Metadata, old_metadatas.len * 2);
 	Entry[] old_entries = self.entries;
-	self.entries = allocator::new_array(self.allocator, Entry, old_entries.len * 2);
+	self.entries = alloc::new_array(self.allocator, Entry, old_entries.len * 2);
 
 	usz old_count = self.count;
 	self.count = 0;
@@ -140,8 +140,8 @@ fn void Set.reallocator(&self) {
 		if (self.count == old_count) break;
 	}
 
-	allocator::free(self.allocator, old_metadatas);
-	allocator::free(self.allocator, old_entries);
+	alloc::free(self.allocator, old_metadatas);
+	alloc::free(self.allocator, old_entries);
 }
 
 fn usz Set.len(&map) @inline {
