@@ -1,8 +1,5 @@
 module set;
 import std::io;
-import wyhash;
-
-macro ulong char[].myhash(char[] c) => wyhash::hash(0, c);
 
 struct Entry {
 	char[] key;
@@ -134,7 +131,7 @@ fn void Set.reallocator(&self) {
 	self.count = 0;
 	foreach (idx, metadata : old_metadatas) {
 		if (metadata.used) {
-			ulong hash = old_entries[idx].key.myhash();
+			ulong hash = old_entries[idx].key.hash();
 			self.add_entry_prehashed(hash, old_entries[idx].key);
 		}
 		if (self.count == old_count) break;
@@ -150,7 +147,7 @@ fn usz Set.len(&map) @inline {
 
 fn void? Set.remove(&self, char[] key) @maydiscard {
 	if (!self.count) return NOT_FOUND~;
-	ulong hash = key.myhash();
+	ulong hash = key.hash();
 	ulong mask = self.metadatas.len - 1;
 	ulong idx = hash & mask;
 	char fingerprint = take_fingerprint(hash);

@@ -45,7 +45,7 @@ fn int main(String[] args) {
 			io::eprintfn("Error reading line: %s", err);
 			return 1;
 		}
-		ulong hash = ((String)line).myhash();
+		ulong hash = ((String)line).hash();
 		if (!filter.contains_prehashed(hash, (String)line)) {
 			String key = ((String)line).copy(&key_arena);
 			filter.insert_prehashed(hash, key);
