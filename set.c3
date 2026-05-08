@@ -29,12 +29,12 @@ fn bool Metadata.is_tombstone(m) @inline {
 // Does not handle empty strings as keys.
 struct Set (Printable) {
 	Allocator allocator;
-	usz count;
+	sz count;
 	Metadata[] metadatas;
 	Entry[] entries;
 }
 
-fn void Set.init(&self, Allocator allocator, usz capacity = 16) {
+fn void Set.init(&self, Allocator allocator, sz capacity = 16) {
 	// check that capacity is a power of 2
 	assert((capacity & (capacity - 1)) == 0, "capacity must be a power of 2");
 
@@ -127,7 +127,7 @@ fn void Set.reallocator(&self) {
 	Entry[] old_entries = self.entries;
 	self.entries = alloc::new_array(self.allocator, Entry, old_entries.len * 2);
 
-	usz old_count = self.count;
+	sz old_count = self.count;
 	self.count = 0;
 	foreach (idx, metadata : old_metadatas) {
 		if (metadata.used) {
@@ -141,7 +141,7 @@ fn void Set.reallocator(&self) {
 	alloc::free(self.allocator, old_entries);
 }
 
-fn usz Set.len(&map) @inline {
+fn sz Set.len(&map) @inline {
 	return map.count;
 }
 
